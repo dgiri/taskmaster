@@ -30,6 +30,25 @@ function TodoList({ tasks, setTasks, status }: TodoListProps) {
     setTasks(updatedTasks);
   }
 
+  function updateTask(
+    id: number,
+    title: string,
+    isEditing: boolean,
+    status: string
+  ) {
+    const updatedTasks = tasks.map((task) =>
+      task.id === id
+        ? { ...task, title: title, isEditing: isEditing, status: status }
+        : task
+    );
+
+    const localTasks = localStorage.getItem("todo-manager");
+    const parsedTasks = localTasks ? JSON.parse(localTasks) : {};
+    parsedTasks.tasks = updatedTasks;
+    localStorage.setItem("todo-manager", JSON.stringify(parsedTasks));
+    setTasks(updatedTasks);
+  }
+
   return (
     <div className="flex flex-col gap-4">
       {tasks
@@ -49,39 +68,27 @@ function TodoList({ tasks, setTasks, status }: TodoListProps) {
                 <input
                   type="text"
                   value={task.title}
-                  onChange={(e) => {
-                    const updatedTasks = tasks.map((t) =>
-                      t.id === task.id ? { ...t, title: e.target.value } : t
-                    );
-                    setTasks(updatedTasks);
-                  }}
+                  onChange={(e) =>
+                    updateTask(task.id, e.target.value, true, task.status)
+                  }
                   className="text-sm font-medium leading-none w-full p-1 border rounded"
-                  onBlur={() => {
-                    const updatedTasks = tasks.map((t) =>
-                      t.id === task.id ? { ...t, isEditing: false } : t
-                    );
-                    setTasks(updatedTasks);
-                  }}
+                  onBlur={(e) =>
+                    updateTask(task.id, e.target.value, false, task.status)
+                  }
                   autoFocus
                 />
               ) : (
                 <p className="text-sm font-medium leading-none">{task.title}</p>
               )}
-              {/* <p className="text-sm text-muted-foreground">
-              Status: {task.status}
-            </p> */}
               <p
                 className={`text-sm ${
                   task.status === "Completed" ? "hidden" : ""
                 }`}
               >
                 <button
-                  onClick={() => {
-                    const updatedTasks = tasks.map((t) =>
-                      t.id === task.id ? { ...t, status: "Completed" } : t
-                    );
-                    setTasks(updatedTasks);
-                  }}
+                  onClick={() =>
+                    updateTask(task.id, task.title, false, "Completed")
+                  }
                   className="mt-2 text-xs text-muted-foreground hover:text-blue-500 border rounded-md p-1"
                 >
                   Mark as Completed

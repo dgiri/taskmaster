@@ -9,11 +9,10 @@ export function BodyElement() {
   const [newTodo, setNewTodo] = useState("");
   const [error, setError] = useState("");
 
-  const [tasks, setTasks] = useState([
-    { id: 1, title: "Task 1", status: "Active" },
-    { id: 2, title: "Task 2", status: "Completed" },
-    { id: 3, title: "Task 3", status: "Active" },
-  ]);
+  const localTasks = localStorage.getItem("todo-manager");
+  const [tasks, setTasks] = useState(
+    localTasks ? JSON.parse(localTasks).tasks : []
+  );
 
   const handleAddTodo = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -23,10 +22,18 @@ export function BodyElement() {
       return;
     }
 
-    setTasks([
-      ...tasks,
-      { id: Math.random(), title: newTodo, status: "Active" },
-    ]);
+    const newTask = {
+      id: Math.random(),
+      title: newTodo,
+      status: "Active",
+    };
+
+    const localTasks = localStorage.getItem("todo-manager");
+    const parsedTasks = localTasks ? JSON.parse(localTasks) : {};
+    parsedTasks.tasks = [...tasks, newTask];
+    localStorage.setItem("todo-manager", JSON.stringify(parsedTasks));
+
+    setTasks(parsedTasks.tasks);
     setNewTodo("");
     setError("");
   };
